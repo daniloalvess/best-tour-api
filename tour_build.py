@@ -19,7 +19,7 @@ def prepare_locations(locations):
     data = [];
 
     for item in locations:
-        location = (int(item["lat"]), int(item['lon']))
+        location = (float(item["lat"]), float(item['lon']))
         data.append(location)
     return data
 
