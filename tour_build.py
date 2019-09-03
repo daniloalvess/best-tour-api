@@ -1,7 +1,5 @@
-"""Simple travelling salesman problem on a circuit board."""
-
 from __future__ import print_function
-import math
+from math import hypot
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 
@@ -15,8 +13,9 @@ def create_data_model(locations):
     data['depot'] = 0
     return data
 
+
 def prepare_locations(locations):
-    data = [];
+    data = []
 
     for item in locations:
         location = (float(item["lat"]), float(item['lon']))
@@ -35,22 +34,21 @@ def compute_euclidean_distance_matrix(locations):
             else:
                 # Euclidean distance
                 distances[from_counter][to_counter] = (int(
-                    math.hypot((from_node[0] - to_node[0]),
+                    hypot((from_node[0] - to_node[0]),
                                (from_node[1] - to_node[1]))))
     return distances
 
 
 def get_tour_list(manager, routing, assignment):
     index = routing.Start(0)
-    tour = [];
-    route_distance = 0
+    tour = []
     while not routing.IsEnd(index):
         tour.append(manager.IndexToNode(index))
-        previous_index = index
         index = assignment.Value(routing.NextVar(index))
 
     tour.append(manager.IndexToNode(index))
     return tour
+
 
 def build_tours(locations):
     """Entry point of the program."""
