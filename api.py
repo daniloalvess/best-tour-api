@@ -16,6 +16,7 @@ class Tour(Resource):
     def post(self):
         data = request.get_json()
         locations = data["locations"]
+        visiting_time = data["visiting_time"] if "visiting_time" in data else 0.25
 
         if len(locations) == 0:
             return {
@@ -25,10 +26,10 @@ class Tour(Resource):
                 "success": False
             }, 412
 
-        return self.get_ordered_tour(locations), 200
+        return self.get_ordered_tour(locations, visiting_time), 200
 
 
-    def get_ordered_tour(self, locations):
+    def get_ordered_tour(self, locations, visiting_time):
         tour_list = []
         build_list = build_tours(locations)
 
@@ -36,7 +37,7 @@ class Tour(Resource):
             tour_list.append(locations[location_index])
 
         distances = tour_calc.get_distances(tour_list)
-        tour_list = tour_calc.get_days_list(tour_list, distances["items"])
+        tour_list = tour_calc.get_days_list(tour_list, distances["items"], visiting_time)
 
         result = {
             "data" : {

@@ -20,14 +20,14 @@ def get_distances(tour_list):
     }
 
 
-def get_days_list(tour_list, distances):
+def get_days_list(tour_list, distances, visiting_time):
     days = {"day1": [tour_list[0]]} # Inicializando o dia com o ponto de partida
     current_day = 1
-    hours_in_day = 7
+    hours_in_day = 8
     time_buffer = 0
 
     for key, distance in enumerate(distances, 1):
-        time = get_time(distance)
+        time = get_time(distance, 50, visiting_time)
 
         if (time_buffer + time < hours_in_day):
             time_buffer += time
@@ -56,6 +56,5 @@ def get_days_list(tour_list, distances):
     return days
 
 
-def get_time(distance, speed = 50):
-    return ceil(distance) / speed
-
+def get_time(distance, speed = 50, visiting_time = 0):
+    return (ceil(distance) / speed) + visiting_time
