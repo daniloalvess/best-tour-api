@@ -1,7 +1,8 @@
 from __future__ import print_function
-from math import hypot
+from math import hypot, ceil
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
+from geopy.distance import geodesic
 
 
 def create_data_model(locations):
@@ -23,7 +24,7 @@ def prepare_locations(locations):
     return data
 
 
-def compute_euclidean_distance_matrix(locations):
+def compute_distance_matrix(locations):
     """Creates callback to return distance between points."""
     distances = {}
     for from_counter, from_node in enumerate(locations):
@@ -32,21 +33,23 @@ def compute_euclidean_distance_matrix(locations):
             if from_counter == to_counter:
                 distances[from_counter][to_counter] = 0
             else:
-                # Euclidean distance
-                distances[from_counter][to_counter] = (int(
-                    hypot((from_node[0] - to_node[0]),
-                               (from_node[1] - to_node[1]))))
+                distance_from = (from_node[0], from_node[1])
+                distance_to = (to_node[0], to_node[1])
+                distances[from_counter][to_counter] = ceil(geodesic(distance_from, distance_to).km)
+
     return distances
 
 
 def get_tour_list(manager, routing, assignment):
     index = routing.Start(0)
     tour = []
+
     while not routing.IsEnd(index):
         tour.append(manager.IndexToNode(index))
         index = assignment.Value(routing.NextVar(index))
 
     tour.append(manager.IndexToNode(index))
+
     return tour
 
 
@@ -62,7 +65,7 @@ def build_tours(locations):
     # Create Routing Model.
     routing = pywrapcp.RoutingModel(manager)
 
-    distance_matrix = compute_euclidean_distance_matrix(data['locations'])
+    distance_matrix = compute_distance_matrix(data['locations'])
 
     def distance_callback(from_index, to_index):
         """Returns the distance between the two nodes."""
