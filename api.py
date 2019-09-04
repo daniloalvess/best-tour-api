@@ -1,8 +1,7 @@
 from flask import Flask, request
 from flask_restful import Api, Resource
-from geopy.distance import geodesic
-from math import ceil
 from tour_build import build_tours
+import tour_calc
 
 app = Flask(__name__)
 api = Api(app)
@@ -30,27 +29,17 @@ class Tour(Resource):
         for location_index in build_list:
             tour_list.append(locations[location_index])
 
+        distances = tour_calc.get_distances(tour_list)
+        tour_list = tour_calc.get_days_list(tour_list, distances["items"])
+
         result = {
             "data" : {
-                "total_distance": self.get_distances(tour_list),
-                "keys_order" : build_list,
                 "tour": tour_list
             },
             "success": True
         }
 
         return result
-
-    def get_distances(self, tour_list):
-        distances = []
-
-        for index, coordinate in enumerate(tour_list):
-            if (index+1 < len(tour_list)):
-                distance1 = coordinate
-                distance2 = tour_list[int(index)+1]
-                distances.append(geodesic((distance1["lat"], distance1["lon"]), (distance2["lat"], distance2["lon"])).km)
-
-        return ceil(sum(distances))
 
 
 api.add_resource(Tour, "/tours/build")
