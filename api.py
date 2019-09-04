@@ -1,10 +1,16 @@
 from flask import Flask, request
 from flask_restful import Api, Resource
 from tour_build import build_tours
+from dotenv import load_dotenv
+from pathlib import Path
+import os
 import tour_calc
 
 app = Flask(__name__)
 api = Api(app)
+
+env_path = Path('.') / '.env'
+load_dotenv(dotenv_path=env_path)
 
 class Tour(Resource):
     def post(self):
@@ -45,5 +51,5 @@ class Tour(Resource):
 api.add_resource(Tour, "/tours/build")
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=os.getenv("DEBUG"))
 
